@@ -31,6 +31,7 @@ public class LevelEditor : Editor
     // Torna cleanCoordinates uma propriedade pública
     public List<Vector2Int> CleanCoordinates { get; private set; }
 
+
     //Function to create inspector game board
     public override void OnInspectorGUI()
     {
@@ -53,7 +54,7 @@ public class LevelEditor : Editor
                 //Manager border
                 BuildBorder();
                 //Build destructable walls
-                BuildDestructableWalls();
+                //BuildDestructableWalls();
                 //Inner walls
                 BuildInnerWalls();
                 //Ajust camera
@@ -73,7 +74,7 @@ public class LevelEditor : Editor
                 //Delete innerWalls
                 DeleteInnerWalls();
                 //Delete destructable walls
-                DeleteDestructableWalls();
+                //DeleteDestructableWalls();
             }
         }
         EditorGUILayout.EndHorizontal();
@@ -390,13 +391,16 @@ public class LevelEditor : Editor
 
         // Define a propriedade CleanCoordinates com a lista final
         CleanCoordinates = cleanCoordinates;
+
+        // Define as coordenadas limpas na classe estática
+        //LevelData.CleanCoordinates = cleanCoordinates;
         /*
         foreach (Vector2Int cleancCord in cleanCoordinates)
         {
             Debug.Log("Coordenadas não ocupadas: " + cleancCord);
         }
         */
-        
+
         scriptActive = false;
     }
     //Function to delete destructable walls
