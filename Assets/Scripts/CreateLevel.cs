@@ -24,4 +24,23 @@ public class CreateLevel : MonoBehaviour
     [Header("Camera")]
     public Camera mainCamera;
 
+
+
+    public static CreateLevel Instance; // Singleton instance
+
+
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this; // Set the singleton instance
+        }
+        else
+        {
+            Destroy(gameObject); // Destroy duplicate instances
+        }
+    }
+
+
 }
