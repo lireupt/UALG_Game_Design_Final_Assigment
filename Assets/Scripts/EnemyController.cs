@@ -33,12 +33,12 @@ public class EnemyController : MonoBehaviour
         if (collision.gameObject.tag == "Player")
         {
             isMoving = false;
-            Debug.Log("Hit the player");
+            //Debug.Log("Hit the player");
         }
         if (collision.gameObject.tag == "Bomb")
         {
             isMoving = false;
-            Debug.Log("Hit the bomb");
+            //Debug.Log("Hit the bomb");
         }
 
     }

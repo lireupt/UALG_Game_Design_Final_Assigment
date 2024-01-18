@@ -1,30 +1,70 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 
 public class AStar : MonoBehaviour
 {
-    private List<Node> path = new List<Node>();  // Declaração da variável path
-
+    public GameObject enemyPrefab;  // Prefab do inimigo
+    private GameObject enemyInstance;  // Instância do inimigo
 
     public GameLevelManager gameLevelManager;
-    public GameObject markerPrefab;
+    public CreateLevel create;
+
+    private Vector2Int targetPosition;  // Posição alvo (por exemplo, a posição do jogador)
 
     private int[,] grid;
-    private Dictionary<Node, Node> cameFrom;
+
+    private float movementSpeed = 5f;  // Velocidade de movimento do bot
+
 
     private void Start()
     {
-       
+        SpawnEnemy();
+        //StartCoroutine(UpdateEnemyMovement()); // Descomente isso se quiser que o bot se mova automaticamente
         SetupGrid();
-        StartEnemyChase();
-        OnDrawGizmos();
+        //MoveBotToAdjacentNodes();
     }
 
-    public void SetGameLevelManager(GameLevelManager manager)
+    /* private Coroutine moveCoroutine;  // Referência para a coroutine em execução
+     */
+
+
+
+    private void Update()
     {
-        gameLevelManager = manager;
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            //PrintAdjacentNodes();
+            //MoveBotBasedOnNodeValue(targetPosition);  // Exemplo: Move o bot para a posição alvo
+            StartCoroutine(MoveBotToAdjacentNodes());
+
+            PrintVisitedNodes();
+
+
+            /* para desligar uma courtime quando acelera o processo de cliques no space, evita o atrufiu 
+            // Interrompe a coroutine anterior, se houver uma em execução
+            if (moveCoroutine != null)
+            {
+                StopCoroutine(moveCoroutine);
+            }
+
+            // Inicia a nova coroutine
+            moveCoroutine = StartCoroutine(MoveBotToAdjacentNodes());
+            */
+
+        }
+
+
+    }
+
+    private void PrintVisitedNodes()
+    {
+        Debug.Log("Visited Nodes:");
+
+        foreach (Vector2Int node in visitedNodes)
+        {
+            Debug.Log($"Dentro da lista esta atualmente({node.x}, {node.y})");
+        }
     }
 
     private void SetupGrid()
@@ -44,8 +84,6 @@ public class AStar : MonoBehaviour
 
                 grid[x, z] = value;
             }
-
-            //Debug.Log("Grid setup completed.");
         }
         else
         {
@@ -53,117 +91,216 @@ public class AStar : MonoBehaviour
         }
     }
 
-    private void StartEnemyChase()
+    private void SpawnEnemy()
     {
-        Vector2Int startPosition = Vector2Int.zero;
-
         List<Vector2Int> avoidedCoordinates = gameLevelManager.AvoidedCoordinates;
-        int count = avoidedCoordinates.Count;
+        Vector2Int startPosition = avoidedCoordinates.Count >= 3 ? avoidedCoordinates[avoidedCoordinates.Count - 3] : Vector2Int.zero;
 
-        if (count >= 3)
-        {
-            startPosition = avoidedCoordinates[count - 3];
-        }
-        else
-        {
-            Debug.LogWarning("Less than 3 coordinates available. Cannot get antepenultimate coordinate.");
-        }
+        // Instanciar o inimigo na posição inicial evitada
+        enemyInstance = Instantiate(enemyPrefab, new Vector3(startPosition.x, 0.5f, startPosition.y), Quaternion.identity);
 
-        Debug.Log($"Enemy startPosition: {startPosition}");
-
-        Vector2Int targetPosition = new Vector2Int(1, 1);
-        Debug.Log($"Player targetPosition: {targetPosition}");
-
-        List<Node> path = BreadthFirstSearch(startPosition, targetPosition);
+        // Definir a posição alvo inicial (pode ser a posição do jogador)
+        targetPosition = new Vector2Int(0, 0);  // Defina sua lógica para determinar a posição alvo inicial
     }
 
-    private List<Node> BreadthFirstSearch(Vector2Int start, Vector2Int target)
+    private void PrintAdjacentNodes()
     {
-        Queue<Node> queue = new Queue<Node>();
-        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
-        cameFrom = new Dictionary<Node, Node>();
+        // Obtém a posição atual do inimigo
+        Vector2Int currentPos = new Vector2Int(Mathf.RoundToInt(enemyInstance.transform.position.x),
+                                               Mathf.RoundToInt(enemyInstance.transform.position.z));
 
-        Node startNode = new Node(start.x, start.y, 0);
-        queue.Enqueue(startNode);
-        visited.Add(new Vector2Int(start.x, start.y));
+        Debug.Log("Posição Atual: " + currentPos);
 
-        while (queue.Count > 0)
+        // Obtém os nós vizinhos ao redor do inimigo (assumindo um grid 2D)
+        List<Vector2Int> adjacentNodes = GetAdjacentNodes(currentPos);
+
+        // Imprime os nós vizinhos
+        Debug.Log("Nós Vizinhos:");
+        foreach (Vector2Int node in adjacentNodes)
         {
-            Node currentNode = queue.Dequeue();
+            Debug.Log($"({node.x}, {node.y}) {grid[node.x, node.y]}");
+        }
 
-            if (currentNode.x == target.x && currentNode.z == target.y)
+        Debug.Log("Grid:");
+
+        for (int z = 0; z < CreateLevel.Instance.gridSizeZ; z++)
+        {
+            string row = "";
+
+            for (int x = 0; x < CreateLevel.Instance.gridSizeX; x++)
             {
-                return ReconstructPath(currentNode, start);
+                row += $"{grid[x, z]} ";
             }
 
-            ExploreNeighbors(currentNode, queue, visited);
+            Debug.Log(row);
         }
-
-        Debug.Log("Path not found.");
-        return null;
     }
 
-    private void ExploreNeighbors(Node node, Queue<Node> queue, HashSet<Vector2Int> visited)
+    private List<Vector2Int> GetAdjacentNodes(Vector2Int centerNode)
     {
-        int[] dx = { -1, 1, 0, 0 };
-        int[] dz = { 0, 0, -1, 1 };
-
-        for (int i = 0; i < 4; i++)
+        // Lógica para obter os nós vizinhos (por exemplo, os nós ao norte, sul, leste e oeste)
+        List<Vector2Int> adjacentNodes = new List<Vector2Int>
         {
-            int newX = node.x + dx[i];
-            int newZ = node.z + dz[i];
+            new Vector2Int(centerNode.x, centerNode.y + 1), // Norte
+            new Vector2Int(centerNode.x, centerNode.y - 1), // Sul
+            new Vector2Int(centerNode.x + 1, centerNode.y), // Leste
+            new Vector2Int(centerNode.x - 1, centerNode.y)  // Oeste
+        };
 
-            Vector2Int neighborPos = new Vector2Int(newX, newZ);
+        return adjacentNodes;
+    }
+    private List<Vector2Int> visitedNodes = new List<Vector2Int>();  // Lista de nós visitados
 
-            if (IsValidMove(neighborPos) && !visited.Contains(neighborPos))
+    private IEnumerator MoveBotToAdjacentNodes()
+    {
+        // Obtém a posição atual do inimigo
+        Vector2Int currentPos = new Vector2Int(Mathf.RoundToInt(enemyInstance.transform.position.x),
+                                               Mathf.RoundToInt(enemyInstance.transform.position.z));
+
+        // Obtém os nós vizinhos ao redor do inimigo (assumindo um grid 2D)
+        List<Vector2Int> adjacentNodes = GetAdjacentNodes(currentPos);
+
+        // Move o bot para o primeiro nó vizinho que não é uma parede e não foi visitado
+        foreach (Vector2Int node in adjacentNodes)
+        {
+            if (IsDestructibleBlock(node))  // Se o próximo nó for um bloco destrutível
             {
-                Node neighborNode = new Node(newX, newZ, node.cost + 1);
-                queue.Enqueue(neighborNode);
-                visited.Add(neighborPos);
-                cameFrom.Add(neighborNode, node);
+                // Permite que o bot volte para até 5 posições anteriores apenas se encontrar um bloco destrutível (valor 3)
+                for (int i = visitedNodes.Count - 1; i >= Mathf.Max(0, visitedNodes.Count - 5); i--)
+                {
+                    Vector2Int previousPos = visitedNodes[i];
+                    if (!IsWall(previousPos))
+                    {
+                        // Simula a colocação de uma bomba e a destruição do bloco
+                        yield return StartCoroutine(SimulateBombPlacement(previousPos));
 
-                Debug.Log($"Creating marker at: {newX}, {newZ}");
-                //Instantiate(markerPrefab, new Vector3(newX, 0, newZ), Quaternion.identity);
+                        // Move o bot para a posição anterior
+                        yield return StartCoroutine(MoveBotToPositionGradual(previousPos));
+
+                        visitedNodes.Add(previousPos);  // Adiciona o nó visitado à lista
+                        break;
+                    }
+                }
             }
-        }
-    }
-
-    private List<Node> ReconstructPath(Node endNode, Vector2Int startPosition)
-    {
-        List<Node> path = new List<Node>();
-        Node currentNode = endNode;
-
-        while (currentNode.x != startPosition.x || currentNode.z != startPosition.y)
-        {
-            path.Add(currentNode);
-            currentNode = cameFrom[currentNode];
-
-            path.Add(currentNode);
-            Debug.Log($"X: {currentNode.x}, Z: {currentNode.z}");
-            currentNode = cameFrom[currentNode];
-
-        }
-
-        path.Reverse();
-        return path;
-    }
-
-    private bool IsValidMove(Vector2Int position)
-    {
-        return position.x >= 0 && position.x < CreateLevel.Instance.gridSizeX
-            && position.y >= 0 && position.y < CreateLevel.Instance.gridSizeZ
-            && grid[position.x, position.y] != 1;
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (path != null)
-        {
-            Gizmos.color = Color.red;
-            foreach (Node node in path)
+            else if (!IsWall(node) && !visitedNodes.Contains(node))
             {
-                Gizmos.DrawSphere(new Vector3(node.x, 0, node.z), 0.1f);
+                yield return StartCoroutine(MoveBotToPositionGradual(node));
+                visitedNodes.Add(node);  // Adiciona o nó visitado à lista
+
+                // Mantém no máximo as últimas 5 posições na lista
+                if (visitedNodes.Count > 5)
+                {
+                    visitedNodes.RemoveAt(0);
+                }
+
+                break;
             }
         }
     }
+
+
+
+
+
+    private IEnumerator MoveBotToPositionGradual(Vector2Int targetNode)
+    {
+        // Armazena a posição atual antes do movimento
+        Vector2Int currentPosition = new Vector2Int(Mathf.RoundToInt(enemyInstance.transform.position.x),
+                                                     Mathf.RoundToInt(enemyInstance.transform.position.z));
+
+        // Limpa a lista e adiciona a nova posição
+        visitedNodes.Clear();
+        visitedNodes.Add(currentPosition);
+
+        Vector3 targetPosition = new Vector3(targetNode.x, 0.5f, targetNode.y);
+
+        while (Vector3.Distance(enemyInstance.transform.position, targetPosition) > 0.01f)
+        {
+            // Verifica se o próximo nó é uma parede
+            if (IsWall(currentPosition))
+            {
+                Debug.Log($"Encontrou uma parede em ({currentPosition.x}, {currentPosition.y})! Movimento interrompido.");
+                yield break;  // Sai da coroutine se encontrou uma parede
+            }
+
+            // Move gradualmente em direção ao próximo nó
+            enemyInstance.transform.position = Vector3.MoveTowards(enemyInstance.transform.position, targetPosition, movementSpeed * Time.deltaTime);
+            yield return null;
+        }
+
+        // Garante que o bot está exatamente no nó
+        enemyInstance.transform.position = targetPosition;
+    }
+
+
+
+
+
+    private bool IsWall(Vector2Int node)
+    {
+        // Lógica para verificar se o nó é uma parede
+        // Pode ser uma verificação na sua matriz grid[x, y]
+        // Retorne true se for uma parede, false caso contrário
+        int nodeValue = grid[node.x, node.y];
+        return nodeValue == 1 || nodeValue == 2;  // Exemplo: 1 representa uma parede, 2 representa um bloco indestrutível
+    }
+
+    private bool IsDestructibleBlock(Vector2Int node)
+    {
+        // Lógica para verificar se o nó é um bloco destrutível
+        // Pode ser uma verificação na sua matriz grid[x, y]
+        // Retorne true se for um bloco destrutível, false caso contrário
+        int nodeValue = grid[node.x, node.y];
+        return nodeValue == 3;  // Exemplo: 3 representa um bloco destrutível
+    }
+
+    /*
+     * TODO falta ver aqui o rebentamento simultaneo da bomba em duas casas adjecentes
+     */
+    private IEnumerator SimulateBombPlacement(Vector2Int bombPosition)
+    {
+        // Simula a colocação de uma bomba (pode adicionar lógica adicional aqui)
+        Debug.Log($"===============>>>>>Colocou uma bomba em ({bombPosition.x}, {bombPosition.y})");
+
+        // Atualiza a grade para simular a explosão da bomba
+        for (int i = 0; i < gameLevelManager.TotalCoordinates.Count; i++)
+        {
+            Coordinate coordinate = gameLevelManager.TotalCoordinates[i];
+
+            if (coordinate.value == 3)
+            {
+                Vector2Int blockPosition = new Vector2Int(coordinate.x, coordinate.y);
+
+                // Verifica se o bloco está na vizinhança da bomba
+                if (Mathf.Abs(blockPosition.x - bombPosition.x) <= 1 && Mathf.Abs(blockPosition.y - bombPosition.y) <= 1)
+                {
+                    // Atualiza o valor do bloco destrutível para 0
+                    gameLevelManager.TotalCoordinates[i].value = 0;
+                    grid[blockPosition.x, blockPosition.y] = 0;  // Atualiza o valor na grid
+                    Debug.Log($"Bloco destruído em <<<<<<================= ({blockPosition.x}, {blockPosition.y})");
+                }
+            }
+        }
+
+        // Move o bot de volta para a posição anterior
+        yield return StartCoroutine(MoveBotToPositionGradual(bombPosition));
+
+        // Adiciona o nó visitado à lista
+        visitedNodes.Add(bombPosition);
+    }
+    
+    
+
+
+
 }
+
+
+
+
+
+
+
+
+
+

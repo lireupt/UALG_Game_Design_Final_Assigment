@@ -5,7 +5,9 @@ using UnityEngine;
 
 public class PlayerContoller : MonoBehaviour
 {
-    
+
+    public AStar aStar;
+
     [SerializeField] float xMoveSpeed;
     [SerializeField] float yMoveSpeed;
     [SerializeField] float zMoveSpeed;
@@ -25,6 +27,7 @@ public class PlayerContoller : MonoBehaviour
     {
         Movement();
         PlaceBomb();
+
     }
 
     private void Movement()
