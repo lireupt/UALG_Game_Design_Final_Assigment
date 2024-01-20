@@ -16,10 +16,13 @@ public class PlayerContoller : MonoBehaviour
 
     [SerializeField] GameObject bombPrefab;
 
+    private GameManager myGameManager;
+
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        myGameManager = FindObjectOfType<GameManager>();
     }
 
     // Update is called once per frame
@@ -27,7 +30,7 @@ public class PlayerContoller : MonoBehaviour
     {
         Movement();
         PlaceBomb();
-
+      
     }
 
     private void Movement()
@@ -59,15 +62,32 @@ public class PlayerContoller : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            //Debug.Log("Bomba");
-
-            
-            //TODO tenho de ver esta parte, porque ele instancia e passa o player sempre para a direita
+            //agora vai colocar as bombas dentro dos NODES corretamente
             GameObject bomb = Instantiate(bombPrefab, transform.position, Quaternion.identity);
-            //bomb.transform.position = transform.position;
+            bomb.transform.position = new Vector3(Mathf.Round(transform.position.x), 0.5f, Mathf.Round(transform.position.z));
         }
-
-
     }
-    
+
+    private void PlayerDied()
+    {
+       
+    }
+
+    private void Died()
+    {
+        //Tell the GAme manager that player died
+        myGameManager.PlayerDied();
+        //PLayer deth animation
+        //remover player of the scene
+    }
+
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.tag == "Enemy")
+        {
+            Died();
+        }
+    }
+
 }

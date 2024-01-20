@@ -1,8 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AStar : MonoBehaviour
+public class testeAntigoOK : MonoBehaviour
 {
     /*
 Este aqui so anda as voltas, mas anda para trás
@@ -26,24 +26,15 @@ Este aqui so anda as voltas, mas anda para trás
         //StartCoroutine(UpdateEnemyMovement()); // Descomente isso se quiser que o bot se mova automaticamente
         SetupGrid();
         //MoveBotToAdjacentNodes();
-        StartCoroutine(AutoMoveBot());
     }
 
     /* private Coroutine moveCoroutine;  // Referência para a coroutine em execução
      */
 
-    private IEnumerator AutoMoveBot()
-    {
-        while (true)
-        {
-            yield return StartCoroutine(MoveBotToAdjacentNodes());
-            yield return new WaitForSeconds(1.0f); // Espera 1 segundo antes de mover novamente (ajuste conforme necessário)
-        }
-    }
+
 
     private void Update()
     {
-        /*
         if (Input.GetKeyDown(KeyCode.Space))
         {
             //PrintAdjacentNodes();
@@ -62,10 +53,10 @@ Este aqui so anda as voltas, mas anda para trás
 
             // Inicia a nova coroutine
             moveCoroutine = StartCoroutine(MoveBotToAdjacentNodes());
-          
+            */
 
-        }*/  
-    
+        }
+
 
     }
 
@@ -232,11 +223,6 @@ Este aqui so anda as voltas, mas anda para trás
 
         while (Vector3.Distance(enemyInstance.transform.position, targetPosition) > 0.01f)
         {
-
-            /*
-             * O CODIGO AQUI TEM S«DE SER REVISTA A LOGICA, PORQUE O BOT NAO RESPONDE DA MESMA FORMA 
-             * SE TEM BLOCO DESTRUTIVEL OU NAO
-            /*
             //ANTIGO
             // Verifica se o próximo nó é uma parede
             if (IsWall(currentPosition))
@@ -244,16 +230,6 @@ Este aqui so anda as voltas, mas anda para trás
                 Debug.Log($"Encontrou uma parede em ({currentPosition.x}, {currentPosition.y})! Movimento interrompido.");
                 yield break;  // Sai da coroutine se encontrou uma parede
             }
-            */
-
-            //NOVO
-            // Verifica se o próximo nó é uma parede
-            if (IsWall(targetNode))
-            {
-                Debug.Log($"Encontrou uma parede em ({targetNode.x}, {targetNode.y})! Movimento interrompido.");
-                yield break;  // Sai da coroutine se encontrou uma parede
-            }
-
 
             // Move gradualmente em direção ao próximo nó
             enemyInstance.transform.position = Vector3.MoveTowards(enemyInstance.transform.position, targetPosition, movementSpeed * Time.deltaTime);
@@ -316,4 +292,9 @@ Este aqui so anda as voltas, mas anda para trás
             }
         }
     }
+    
+    
+
+
+
 }

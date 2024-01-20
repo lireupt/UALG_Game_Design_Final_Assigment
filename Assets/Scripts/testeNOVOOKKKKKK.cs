@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AStar : MonoBehaviour
+public class testeOKKKKKK : MonoBehaviour
 {
     /*
-Este aqui so anda as voltas, mas anda para trás
+Este aqui percorre todo o tabuleiro mas passa por cima dos blocos destrutiveis, mas NAO anda para trás
     */
+
     public GameObject enemyPrefab;  // Prefab do inimigo
     private GameObject enemyInstance;  // Instância do inimigo
 
@@ -26,31 +27,22 @@ Este aqui so anda as voltas, mas anda para trás
         //StartCoroutine(UpdateEnemyMovement()); // Descomente isso se quiser que o bot se mova automaticamente
         SetupGrid();
         //MoveBotToAdjacentNodes();
-        StartCoroutine(AutoMoveBot());
     }
 
     /* private Coroutine moveCoroutine;  // Referência para a coroutine em execução
      */
 
-    private IEnumerator AutoMoveBot()
-    {
-        while (true)
-        {
-            yield return StartCoroutine(MoveBotToAdjacentNodes());
-            yield return new WaitForSeconds(1.0f); // Espera 1 segundo antes de mover novamente (ajuste conforme necessário)
-        }
-    }
+
 
     private void Update()
     {
-        /*
         if (Input.GetKeyDown(KeyCode.Space))
         {
             //PrintAdjacentNodes();
             //MoveBotBasedOnNodeValue(targetPosition);  // Exemplo: Move o bot para a posição alvo
             StartCoroutine(MoveBotToAdjacentNodes());
 
-            PrintVisitedNodes();
+            // PrintVisitedNodes();
 
 
             /* para desligar uma courtime quando acelera o processo de cliques no space, evita o atrufiu 
@@ -62,10 +54,10 @@ Este aqui so anda as voltas, mas anda para trás
 
             // Inicia a nova coroutine
             moveCoroutine = StartCoroutine(MoveBotToAdjacentNodes());
-          
+            */
 
-        }*/  
-    
+        }
+
 
     }
 
@@ -161,7 +153,10 @@ Este aqui so anda as voltas, mas anda para trás
 
         return adjacentNodes;
     }
+
+
     private List<Vector2Int> visitedNodes = new List<Vector2Int>();  // Lista de nós visitados
+
     private List<Vector2Int> allVisitedNodes = new List<Vector2Int>();  // Lista de todos os nós visitados
 
     private IEnumerator MoveBotToAdjacentNodes()
@@ -178,12 +173,16 @@ Este aqui so anda as voltas, mas anda para trás
         {
             if (IsDestructibleBlock(node))  // Se o próximo nó for um bloco destrutível
             {
-                // Permite que o bot volte para até 5 posições anteriores apenas se encontrar um bloco destrutível (valor 3)
+                Debug.Log("Início do Loop de Retrocesso");
                 for (int i = visitedNodes.Count - 1; i >= Mathf.Max(0, visitedNodes.Count - 5); i--)
                 {
                     Vector2Int previousPos = visitedNodes[i];
+                    //Debug.Log($"Verificando posição anterior: ({previousPos.x}, {previousPos.y})");
+
                     if (!IsWall(previousPos))
                     {
+                        Debug.Log("Posição anterior não é uma parede. Executando retrocesso.");
+
                         // Simula a colocação de uma bomba e a destruição do bloco
                         yield return StartCoroutine(SimulateBombPlacement(previousPos));
 
@@ -191,7 +190,7 @@ Este aqui so anda as voltas, mas anda para trás
                         yield return StartCoroutine(MoveBotToPositionGradual(previousPos));
 
                         visitedNodes.Add(previousPos);  // Adiciona o nó visitado à lista
-                        allVisitedNodes.Add(previousPos);
+                        allVisitedNodes.Add(previousPos);  // Adiciona o nó visitado à lista de todos os nós visitados
                         break;
                     }
                 }
@@ -200,6 +199,8 @@ Este aqui so anda as voltas, mas anda para trás
             {
                 yield return StartCoroutine(MoveBotToPositionGradual(node));
                 visitedNodes.Add(node);  // Adiciona o nó visitado à lista
+
+                allVisitedNodes.Add(node);  // Adiciona o nó visitado à lista de todos os nós visitados
 
                 // Mantém no máximo as últimas 5 posições na lista
                 if (visitedNodes.Count > 5)
@@ -212,40 +213,19 @@ Este aqui so anda as voltas, mas anda para trás
         }
     }
 
-
-
-
     private IEnumerator MoveBotToPositionGradual(Vector2Int targetNode)
     {
         // Armazena a posição atual antes do movimento
         Vector2Int currentPosition = new Vector2Int(Mathf.RoundToInt(enemyInstance.transform.position.x),
                                                      Mathf.RoundToInt(enemyInstance.transform.position.z));
 
-        // Limpa a lista e adiciona a nova posição
-        visitedNodes.Clear();
-        visitedNodes.Add(currentPosition);
-
-
+        // Adiciona a nova posição à lista
         visitedNodes.Add(targetNode);
 
         Vector3 targetPosition = new Vector3(targetNode.x, 0.5f, targetNode.y);
 
         while (Vector3.Distance(enemyInstance.transform.position, targetPosition) > 0.01f)
         {
-
-            /*
-             * O CODIGO AQUI TEM S«DE SER REVISTA A LOGICA, PORQUE O BOT NAO RESPONDE DA MESMA FORMA 
-             * SE TEM BLOCO DESTRUTIVEL OU NAO
-            /*
-            //ANTIGO
-            // Verifica se o próximo nó é uma parede
-            if (IsWall(currentPosition))
-            {
-                Debug.Log($"Encontrou uma parede em ({currentPosition.x}, {currentPosition.y})! Movimento interrompido.");
-                yield break;  // Sai da coroutine se encontrou uma parede
-            }
-            */
-
             //NOVO
             // Verifica se o próximo nó é uma parede
             if (IsWall(targetNode))
@@ -253,7 +233,6 @@ Este aqui so anda as voltas, mas anda para trás
                 Debug.Log($"Encontrou uma parede em ({targetNode.x}, {targetNode.y})! Movimento interrompido.");
                 yield break;  // Sai da coroutine se encontrou uma parede
             }
-
 
             // Move gradualmente em direção ao próximo nó
             enemyInstance.transform.position = Vector3.MoveTowards(enemyInstance.transform.position, targetPosition, movementSpeed * Time.deltaTime);
@@ -263,10 +242,6 @@ Este aqui so anda as voltas, mas anda para trás
         // Garante que o bot está exatamente no nó
         enemyInstance.transform.position = targetPosition;
     }
-
-
-
-
 
     private bool IsWall(Vector2Int node)
     {
@@ -292,7 +267,7 @@ Este aqui so anda as voltas, mas anda para trás
     private IEnumerator SimulateBombPlacement(Vector2Int bombPosition)
     {
         // Simula a colocação de uma bomba (pode adicionar lógica adicional aqui)
-        Debug.Log($"Colocou uma bomba em ({bombPosition.x}, {bombPosition.y})");
+        Debug.Log($"Colocou uma bomba em ==============>>>>>>({bombPosition.x}, {bombPosition.y})");
 
         // Move o bot de volta para a posição anterior
         yield return StartCoroutine(MoveBotToPositionGradual(bombPosition));
@@ -312,8 +287,14 @@ Este aqui so anda as voltas, mas anda para trás
                 // Atualiza o valor do bloco destrutível para 0
                 gameLevelManager.TotalCoordinates[i].value = 0;
                 grid[blockPosition.x, blockPosition.y] = 0;  // Atualiza o valor na grid
-                Debug.Log($"Bloco destruído em ({blockPosition.x}, {blockPosition.y})");
+                Debug.Log($"Bloco destruído em ({blockPosition.x}, {blockPosition.y})<<<<<<<<<<================");
             }
         }
     }
+
+
+
+
+
 }
+
