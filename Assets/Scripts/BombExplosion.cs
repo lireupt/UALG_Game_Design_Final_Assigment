@@ -9,13 +9,13 @@ public class BombExplosion : MonoBehaviour
     public float radius = 5.0f;
     public float upForce = 1.0f;
 
-    public GameObject explodePrefab;
-    PlayerContoller player;
+    private GameObject explodePrefab;
+    PlayerController player;
 
     // Start is called before the first frame update
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerContoller>();
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
         //Debug.Log("O nome do objecto +e : " + player.name);
     }
 

@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Bomb
   - Enemy
+  - Wall
+  - DestrWall
+  - GameManager
   layers:
   - Default
   - TransparentFX

@@ -4,20 +4,21 @@ using UnityEngine;
 
 public class Bomb : MonoBehaviour
 {
-
-    PlayerContoller player;
+    PlayerController player;
     private float explosionTimer = 0;
-
-    [SerializeField] private float explodeDelay = 2f;  
     [SerializeField] private GameObject explosionPrefab;
+    [SerializeField] private float explodeDelay = 2f;  
     [SerializeField] private float explodeSpeed = 200f;
-    [SerializeField] private float explodeRange = 0;
+    private int explodeRange = 1;
+
 
     // Start is called before the first frame update
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerContoller>();
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
         //Debug.Log("O nome do objecto +e : " + player.name);
+        explodeRange = FindAnyObjectByType<GameManager>().GetExplodeRange();
+       
     }
 
     // Update is called once per frame
@@ -26,20 +27,16 @@ public class Bomb : MonoBehaviour
         explosionTimer += Time.deltaTime;
         if (explosionTimer >= explodeDelay)
         {
-            Explode();
-          
+            Explode();         
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        //Debug.Log("Aqui dentro");
         if (other.tag == "Player")
         {
             GetComponent<SphereCollider>().isTrigger = false;
         }
-       
-
     }
 
     public void Explode()
@@ -57,6 +54,7 @@ public class Bomb : MonoBehaviour
         GameObject explosionDown = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
         explosionDown.GetComponent<Explosion>().SetExplosion(Vector3.back, explodeSpeed, explodeRange);
 
-        Destroy(gameObject);
+        player.BombExploded();
+        Destroy(gameObject);       
     }
 }

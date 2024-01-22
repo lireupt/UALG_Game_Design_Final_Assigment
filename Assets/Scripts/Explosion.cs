@@ -2,8 +2,6 @@
 using UnityEditor;
 using UnityEngine;
 
-
-
 public class Explosion : MonoBehaviour
 {
     private Rigidbody rb;
@@ -41,24 +39,39 @@ public class Explosion : MonoBehaviour
         explodeRange = range;
     }
 
-
-    /* TODO
-     * A bomba nao se esta a detruir depois de sair na direçao da parede
-     */
     private void OnTriggerEnter(Collider other)
     {
-        
-        Debug.Log("Explosio has hit: " + other.gameObject + " with the tag of " + other.gameObject.tag);
-        
+              
         if (other.gameObject.tag == "Wall")
         {
             Destroy(gameObject);
         }
-        if (other.gameObject.tag == "Bomb")
+
+        if (other.gameObject.tag == "Bomb" )
         {
-            other.gameObject.GetComponent <Bomb>().Explode();
-            Destroy(gameObject);
+            // Verifica se o objeto possui o componente necessário antes de acessá-lo
+            Bomb bomb = other.gameObject.GetComponent<Bomb>();
+            if (bomb != null)
+            {
+                // Faça alguma coisa com a bomba
+                Destroy(gameObject);
+            }
         }
 
+        if (other.gameObject.tag == "Player")
+        {
+            other.gameObject.GetComponent<PlayerController>().Died();
+          //  Destroy(gameObject);
+        }
+        if (other.gameObject.tag == "Enemy")
+        {
+            other.gameObject.GetComponent<EnemyController>().Died();
+            //  Destroy(gameObject);
+        }
+        if (other.gameObject.tag == "DestrWall")
+        {
+            Destroy(other.gameObject);
+            Destroy(gameObject);
+        }
     }
 }

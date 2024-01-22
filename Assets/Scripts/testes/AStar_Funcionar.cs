@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AStar : MonoBehaviour
+public class AStar_Funcionar : MonoBehaviour
 {
     /*
-  Este aqui so anda as voltas, mas anda para trás
-      */
+ Este aqui so anda as voltas, mas anda para trás
+     */
     public GameObject enemyPrefab;  // Prefab do inimigo
     private GameObject enemyInstance;  // Instância do inimigo
 
@@ -41,7 +41,7 @@ public class AStar : MonoBehaviour
         while (true)
         {
             yield return StartCoroutine(MoveBotToAdjacentNodes());
-            yield return new WaitForSeconds(0.5f); // Espera 1 segundo antes de mover novamente (ajuste conforme necessário)
+            yield return new WaitForSeconds(1.0f); // Espera 1 segundo antes de mover novamente (ajuste conforme necessário)
         }
     }
 
@@ -161,38 +161,32 @@ public class AStar : MonoBehaviour
         // Move o bot para o primeiro nó vizinho que não é uma parede e não foi visitado
         foreach (Vector2Int node in adjacentNodes)
         {
-            if (IsDestructibleBlock(node))
+            if (IsDestructibleBlock(node))  // Se o próximo nó for um bloco destrutível
             {
+                // Permite que o bot volte para até 5 posições anteriores apenas se encontrar um bloco destrutível (valor 3)
                 for (int i = visitedNodes.Count - 1; i >= Mathf.Max(0, visitedNodes.Count - 5); i--)
                 {
                     Vector2Int previousPos = visitedNodes[i];
                     if (!IsWall(previousPos))
                     {
+                        // Simula a colocação de uma bomba e a destruição do bloco
                         yield return StartCoroutine(SimulateBombPlacement(previousPos));
 
-                        // Verifica se enemyInstance ainda é válido antes de acessar enemyController
-                        if (enemyInstance != null)
-                        {
-                            enemyController = enemyInstance.GetComponent<EnemyController>();
-                        }
+                        // Move o bot para a posição anterior
+                        yield return StartCoroutine(MoveBotToPositionGradual(previousPos));
 
-                        if (enemyController != null)
-                        {
-                            // Move o bot para a posição anterior
-                            yield return StartCoroutine(MoveBotToPositionGradual(previousPos));
-
-                            visitedNodes.Add(previousPos);
-                            allVisitedNodes.Add(previousPos);
-                            break;
-                        }
+                        visitedNodes.Add(previousPos);  // Adiciona o nó visitado à lista
+                        allVisitedNodes.Add(previousPos);
+                        break;
                     }
                 }
             }
             else if (!IsWall(node) && !visitedNodes.Contains(node))
             {
                 yield return StartCoroutine(MoveBotToPositionGradual(node));
-                visitedNodes.Add(node);
+                visitedNodes.Add(node);  // Adiciona o nó visitado à lista
 
+                // Mantém no máximo as últimas 5 posições na lista
                 if (visitedNodes.Count > 5)
                 {
                     visitedNodes.RemoveAt(0);
@@ -229,24 +223,11 @@ public class AStar : MonoBehaviour
             */
             //ANTIGO
             // Verifica se o próximo nó é uma parede
-            /*
             if (IsWall(currentPosition))
             {
                 Debug.Log($"Encontrou uma parede em ({currentPosition.x}, {currentPosition.y})! Movimento interrompido.");
                 yield break;  // Sai da coroutine se encontrou uma parede
             }
-            */
-
-            if (IsWall(targetNode))
-            {
-                Debug.Log($"Encontrou uma parede em ({targetNode.x}, {targetNode.y})! Movimento interrompido.");
-                yield break;
-            }
-
-            enemyInstance.transform.position = Vector3.MoveTowards(enemyInstance.transform.position, targetPosition, movementSpeed * Time.deltaTime);
-            yield return null;
-
-
             /*
 
              //NOVO
@@ -265,12 +246,7 @@ public class AStar : MonoBehaviour
 
         // Garante que o bot está exatamente no nó
         enemyInstance.transform.position = targetPosition;
-       
     }
-
-
-
-
 
     private bool IsWall(Vector2Int node)
     {
@@ -297,7 +273,6 @@ public class AStar : MonoBehaviour
      */
     private IEnumerator SimulateBombPlacement(Vector2Int bombPosition)
     {
-        /*
         // Simula a colocação de uma bomba (pode adicionar lógica adicional aqui)
         // Debug.Log($"Colocou uma bomba em ({bombPosition.x}, {bombPosition.y})");
 
@@ -328,29 +303,6 @@ public class AStar : MonoBehaviour
                 gameLevelManager.TotalCoordinates[i].value = 0;
                 grid[blockPosition.x, blockPosition.y] = 0;  // Atualiza o valor na grid
                                                              //  Debug.Log($"Bloco destruído em ({blockPosition.x}, {blockPosition.y})");
-            }
-        }*/
-
-        yield return StartCoroutine(MoveBotToPositionGradual(bombPosition));
-
-        visitedNodes.Add(bombPosition);
-
-        for (int i = 0; i < gameLevelManager.TotalCoordinates.Count; i++)
-        {
-            Vector2Int blockPosition = new Vector2Int(gameLevelManager.TotalCoordinates[i].x, gameLevelManager.TotalCoordinates[i].y);
-
-            if (IsDestructibleBlock(blockPosition) &&
-                ((Mathf.Abs(blockPosition.x - bombPosition.x) == 1 && blockPosition.y == bombPosition.y) ||
-                 (Mathf.Abs(blockPosition.y - bombPosition.y) == 1 && blockPosition.x == bombPosition.x)))
-            {
-                if (enemyController != null)
-                {
-                    GameObject bomb = Instantiate(bombPrefab);
-                    bomb.transform.position = new Vector3(Mathf.Round(enemyController.transform.position.x), 0.5f, Mathf.Round(enemyController.transform.position.z));
-                }
-
-                gameLevelManager.TotalCoordinates[i].value = 0;
-                grid[blockPosition.x, blockPosition.y] = 0;
             }
         }
     }

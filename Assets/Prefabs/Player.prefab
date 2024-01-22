@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 3601339606337096194}
   - component: {fileID: 451735302968900036}
   - component: {fileID: 4347070298435906677}
+  - component: {fileID: 2412422454869436634}
   - component: {fileID: 3935906790290084241}
-  - component: {fileID: 8904319197537446881}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -93,7 +93,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7092395832613272556}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 3c139c9b23a18344c8b4e19acb67696a, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -109,24 +109,7 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3935906790290084241
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7092395832613272556}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89e91ce4e2f365947b7486bb3d660816, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  aStar: {fileID: 0}
-  xMoveSpeed: 5
-  yMoveSpeed: 0
-  zMoveSpeed: 5
-  bombPrefab: {fileID: 2048996874560267400, guid: 11673ecb45418a24681bbfd68039c29e, type: 3}
---- !u!54 &8904319197537446881
+--- !u!54 &2412422454869436634
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -134,7 +117,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7092395832613272556}
   serializedVersion: 4
-  m_Mass: 100
+  m_Mass: 1
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -153,3 +136,21 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &3935906790290084241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7092395832613272556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89e91ce4e2f365947b7486bb3d660816, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xMoveSpeed: 4
+  yMoveSpeed: 0
+  zMoveSpeed: 4
+  maxBomb: 1
+  destroyTimer: 2
+  bombPrefab: {fileID: 2048996874560267400, guid: 11673ecb45418a24681bbfd68039c29e, type: 3}
