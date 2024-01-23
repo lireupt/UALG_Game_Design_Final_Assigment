@@ -11,14 +11,13 @@ public class GameManager : MonoBehaviour
     private int maxBomb = 1;
     private int explodeRange = 1;
     private int enemyInLevel = 0;
-
-    [SerializeField] private GameObject playerPrefab;
-    // Start is called before the first frame update
-    [SerializeField] private float delayPlayer = 1f;
-
+    private float moveSpeed = 4f;
+    private float speedIncrise = 0.4f;
     private PlayerController currentPlayer;
+    
+    [SerializeField] private GameObject playerPrefab;
+    [SerializeField] private float delayPlayer = 1f;
     [SerializeField] float delayToPlayer = 1f;
-
     [SerializeField] private Text timerText;
     public float timeLimit = 60f; // Tempo limite em segundos
     private float currentTime = 0f;
@@ -27,6 +26,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Text liveText;
     [SerializeField] private Text bombText;
     [SerializeField] private Text rangeText;
+    [SerializeField] private Text speedText;
     [SerializeField] private GameObject pausePanel;
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private GameObject winPanel;
@@ -39,12 +39,9 @@ public class GameManager : MonoBehaviour
         UpdateLivesText();
         UpdateBombsText();
         UpdateRangeText();
+        UpdateSpeedText();
         GetEnemyInScene();
-       
         enemyInLevel = GetEnemyInScene();
-        Debug.Log(enemyInLevel);
-
-
     }
 
     private void Update()
@@ -105,7 +102,7 @@ public class GameManager : MonoBehaviour
     {
         GameObject player = Instantiate(playerPrefab, new Vector3(1, 0.5f, 1), Quaternion.identity);
         currentPlayer = player.GetComponent<PlayerController>();
-        currentPlayer.initializePlayer(maxBomb);
+        currentPlayer.initializePlayer(maxBomb, moveSpeed);
         UpdateLivesText();
     }
 
@@ -125,9 +122,20 @@ public class GameManager : MonoBehaviour
         rangeText.text = "Range: " + explodeRange.ToString("D1");
     }
 
+    private void UpdateSpeedText()
+    {
+        speedText.text = "Speed: " + moveSpeed.ToString();
+    }
+
     public int GetExplodeRange()
     {
         return explodeRange;
+    }
+
+    public void IncreaseExplodeRange()
+    {  
+        explodeRange++;
+        UpdateRangeText();
     }
 
     public void PauseButton ()
@@ -177,5 +185,18 @@ public class GameManager : MonoBehaviour
             Debug.Log("Level complete: ");
         }
     }
+    public void IncreaseMaxBombs()
+    {
+        maxBomb++;
+        UpdateBombsText();
+        currentPlayer.initializePlayer(maxBomb, moveSpeed);
+    }
 
+    public void IncreaseSpeed()
+    {
+        moveSpeed += speedIncrise;
+        UpdateSpeedText();
+        currentPlayer.initializePlayer(maxBomb, moveSpeed);
+    }
 }
+

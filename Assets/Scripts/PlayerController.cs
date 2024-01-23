@@ -6,9 +6,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
 
-    [SerializeField] float xMoveSpeed;
-    [SerializeField] float yMoveSpeed;
-    [SerializeField] float zMoveSpeed;
+    float moveSpeed = 0;
     [SerializeField] private float destroyTimer = 2f;
     private int maxBomb = 1;
     private int bombPlaced = 0;
@@ -44,19 +42,19 @@ public class PlayerController : MonoBehaviour
         Vector3 newVelocity = new Vector3();
         if (Input.GetKey(KeyCode.W))
         {
-            newVelocity += new Vector3(0f, 0f, zMoveSpeed);
+            newVelocity += new Vector3(0f, 0f, moveSpeed);
         }
         if (Input.GetKey(KeyCode.S))
         {
-            newVelocity += new Vector3(0f, 0f, -zMoveSpeed);
+            newVelocity += new Vector3(0f, 0f, -moveSpeed);
         }
         if (Input.GetKey(KeyCode.A))
         {
-            newVelocity += new Vector3(-xMoveSpeed, 0f, 0f);
+            newVelocity += new Vector3(-moveSpeed, 0f, 0f);
         }
         if (Input.GetKey(KeyCode.D))
         {
-            newVelocity += new Vector3(xMoveSpeed, 0f, 0f);
+            newVelocity += new Vector3(moveSpeed, 0f, 0f);
         }
 
         rb.velocity = newVelocity;
@@ -110,13 +108,16 @@ public class PlayerController : MonoBehaviour
         return destroyTimer;
     }
 
-    public void initializePlayer(int bombs)
+    public void initializePlayer(int bombs, float speed)
     {
         maxBomb = bombs;
+        moveSpeed = speed;
     }
 
     public void SetPaused(bool state)
     {
         isPaused = state;
     }
+
+    
 }
