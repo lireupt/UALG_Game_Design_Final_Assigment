@@ -16,11 +16,11 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
+  - DestrWall
+  - Enemy
+  - Player
+  - Wall
+  - Bombs
   - 
   - 
   - 

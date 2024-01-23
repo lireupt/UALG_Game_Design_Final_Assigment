@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class GameManager : MonoBehaviour
     private int lives = 3;
     private int maxBomb = 1;
     private int explodeRange = 1;
+    private int enemyInLevel = 0;
 
     [SerializeField] private GameObject playerPrefab;
     // Start is called before the first frame update
@@ -25,6 +27,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Text liveText;
     [SerializeField] private Text bombText;
     [SerializeField] private Text rangeText;
+    [SerializeField] private GameObject pausePanel;
+    [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private GameObject winPanel;
+
 
 
     void Start()
@@ -33,6 +39,12 @@ public class GameManager : MonoBehaviour
         UpdateLivesText();
         UpdateBombsText();
         UpdateRangeText();
+        GetEnemyInScene();
+       
+        enemyInLevel = GetEnemyInScene();
+        Debug.Log(enemyInLevel);
+
+
     }
 
     private void Update()
@@ -83,7 +95,8 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Game Over");
+            //Debug.Log("Game Over");
+            GameOver();
         }
         Debug.Log("Player died");
     }
@@ -121,15 +134,48 @@ public class GameManager : MonoBehaviour
     {
         if (isPaused)
         {
+            pausePanel.SetActive(false);
             currentPlayer.SetPaused(false);
             isPaused = false;
             Time.timeScale = 1f;
         }
         else
         {
+            pausePanel.SetActive(true);
             currentPlayer.SetPaused(true);
             isPaused = true;
             Time.timeScale = 0f;
         }
     }
+
+    private void GameOver()
+    {
+        gameOverPanel.SetActive(true);
+    }
+
+    public void LoadMainMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    private int GetEnemyInScene()
+    {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        int count = enemies.Length;
+        return count;
+    }
+
+    public void EnemyHasDied()
+    {
+        enemyInLevel--;
+
+        Debug.Log("Enemies inthis level: " + enemyInLevel);
+        if (enemyInLevel <= 0)
+        {
+            // Esta desativado pk o inimigo esta constantemente a bater na bomba  e mata-se a ele proprio  
+            //winPanel.SetActive(true);
+            Debug.Log("Level complete: ");
+        }
+    }
+
 }

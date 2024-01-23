@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3094510876744674166}
   - component: {fileID: 4504465211405827666}
   - component: {fileID: -5729047011639254525}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: block_destructable
   m_TagString: DestrWall
   m_Icon: {fileID: 0}

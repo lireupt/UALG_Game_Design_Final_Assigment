@@ -48,6 +48,18 @@ public class EnemyController : MonoBehaviour
 
     public void Died()
     {
+        GameManager myGamerManager = FindObjectOfType<GameManager>();
+        myGamerManager.EnemyHasDied();
+
+
+
+        /*
+         //Controlador de ganhar do inimigo se o meu plyer matar o inimigo, desativado pk ainda falta optimizar a busca no ASTAR
+        ele ainda faz a busca e esta sempre a perder
+        
+        myGamerManager.WinPanel();
+         
+         */
         Destroy(gameObject);
     }
 }

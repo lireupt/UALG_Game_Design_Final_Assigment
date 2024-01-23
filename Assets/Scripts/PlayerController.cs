@@ -66,9 +66,19 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space) && bombPlaced < maxBomb)
         {
+            //Verifica se ja existe um bomba no local, entao não vai permitir instanciar mais nenhuma bomba
+            Vector3 center = new Vector3(Mathf.Round(transform.position.x), 0.5f, Mathf.Round(transform.position.z));
+            Collider[] hitColliders = Physics.OverlapSphere(center, 0.5f);
+            foreach (Collider hitCollider in hitColliders)
+            {
+                if (hitCollider.tag == "Bomb")
+                {
+                    return;
+                }
+            }
             //agora vai colocar as bombas dentro dos NODES corretamente
             GameObject bomb = Instantiate(bombPrefab, transform.position, Quaternion.identity);
-            bomb.transform.position = new Vector3(Mathf.Round(transform.position.x), 0.5f, Mathf.Round(transform.position.z));
+            bomb.transform.position = center;
             bombPlaced++;
         }
     }
