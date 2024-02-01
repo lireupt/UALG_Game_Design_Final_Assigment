@@ -10,56 +10,76 @@ public class EnemyController : MonoBehaviour
     //[SerializeField] private float maxdelayTime = 0.3f;
 
     Rigidbody rb;
+    AudioSource myAudioSource;
+
+    [SerializeField] private float destroyTimer = 2f;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
+        myAudioSource = GetComponent<AudioSource>();
     }
-   
+
+    void FixedUpdate()
+    {
+        Rotation();
+    }
+
+    // Function to handle the rotation of the enemy towards its movement direction
+    public void Rotation()
+    {
+        transform.LookAt(rb.position);
+    }
+
+    // Triggered when the enemy collides with another collider (useful for detecting the player)
     void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "Player")
         {
-            //isMoving = false;
-            Debug.Log("Hit the player como trigguer");
+            // isMoving = false;
+            Debug.Log("Hit the player as trigger");
         }
     }
-   
-    public void OnColliderEnter(Collision other)
+
+    // Triggered when the enemy collides with another collider (useful for detecting the player and other objects)
+    // Need to adjust this part to deflect enemy bombs and the like
+    /*
+    public void OnCollisionEnter(Collision other)
     {
         if (other.gameObject.tag == "Player")
         {
-            Debug.Log("Hit the player como collider");
-            isMoving = false;
-            
+            // Debug.Log("Hit the player as collider");
+            // isMoving = false;
         }
         if (other.gameObject.tag == "Bomb")
         {
-            Debug.Log("Hit the bomb");
-            //isMoving = false;
-            
+            // Debug.Log("===========>>HIT THE BOMB");
+            // isMoving = false;
         }
         if (other.gameObject.tag == "DestrWall")
         {
-            
-            Debug.Log("Explosio has hit: " + other.gameObject + " with the tag of " + other.gameObject.tag);
+            // Debug.Log("Explosion has hit: " + other.gameObject + " with the tag of " + other.gameObject.tag);
         }
-    }
+    }*/
 
+
+    // Called when the enemy dies
     public void Died()
     {
-        GameManager myGamerManager = FindObjectOfType<GameManager>();
-        myGamerManager.EnemyHasDied();
+        GameManager myGameManager = FindObjectOfType<GameManager>();
+        myGameManager.EnemyHasDied();
 
-
+        // Play audio when the enemy dies
+        myAudioSource.Play();
 
         /*
-         //Controlador de ganhar do inimigo se o meu plyer matar o inimigo, desativado pk ainda falta optimizar a busca no ASTAR
-        ele ainda faz a busca e esta sempre a perder
-        
-        myGamerManager.WinPanel();
+         // Controller for winning if the player kills the enemy, disabled because ASTAR search optimization is still pending
+         he still does the search and is always losing
+         
+        myGameManager.WinPanel();
          
          */
-        Destroy(gameObject);
+        // Destroy the enemy object after a certain delay
+        Destroy(gameObject, destroyTimer);
     }
 }

@@ -37,8 +37,6 @@ public class BombExplosion : MonoBehaviour
 
     }
 
-
-
     void Detonate()
     {
         Instantiate(explodePrefab, transform.position, transform.rotation);

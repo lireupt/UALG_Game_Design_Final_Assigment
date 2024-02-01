@@ -6,13 +6,18 @@ public class PowerUp : MonoBehaviour
 {
     enum PowerUps {MaxBombs, Range, Speed}
     [SerializeField] PowerUps powerUpType;
-    // Start is called before the first frame update
+
+    //[SerializeField] private AudioClip powerUpSound;
+
+    
     private void OnTriggerEnter(Collider other)
     {
         if( other.gameObject.tag == "Player")
-        {
-            if(powerUpType == PowerUps.MaxBombs)
+        {        
+            if (powerUpType == PowerUps.MaxBombs)
             {
+                FindObjectOfType<PlayerController>().PlayPowerUpSound();
+
                 //incrise maxbombs
                 FindAnyObjectByType<GameManager>().IncreaseMaxBombs();
                 Destroy(gameObject);

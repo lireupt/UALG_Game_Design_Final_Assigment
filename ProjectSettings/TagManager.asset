@@ -9,6 +9,8 @@ TagManager:
   - Wall
   - DestrWall
   - GameManager
+  - Undefined
+  - PowerUp
   layers:
   - Default
   - TransparentFX

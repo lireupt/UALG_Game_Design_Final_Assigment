@@ -70,8 +70,16 @@ public class Explosion : MonoBehaviour
         }
         if (other.gameObject.tag == "DestrWall")
         {
+            FindObjectOfType<PowerUpSpawner>().BlockDestroyed(other.transform.position);
             Destroy(other.gameObject);
             Destroy(gameObject);
         }
+        if(other.gameObject.tag == "PowerUp")
+        {
+            Destroy(other.gameObject);
+            Destroy(gameObject);
+        }
+
     }
+
 }

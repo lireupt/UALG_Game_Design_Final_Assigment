@@ -9,23 +9,23 @@ public class AStar_Funcionar : MonoBehaviour
      */
     public GameObject enemyPrefab;  // Prefab do inimigo
     private GameObject enemyInstance;  // Instância do inimigo
-
     public GameLevelManager gameLevelManager;
     public CreateLevel create;
-
     private Vector2Int targetPosition;  // Posição alvo (por exemplo, a posição do jogador)
-
+    public NumberChoiceController numberGrid;
     private int[,] grid;
-
     private EnemyController enemyController;  // Adicione esta linha
-
     private float movementSpeed = 25f;  // Velocidade de movimento do bot
+
+    private List<Vector2Int> visitedNodes = new List<Vector2Int>();  // Lista de nós visitados
+    private List<Vector2Int> allVisitedNodes = new List<Vector2Int>();  // Lista de todos os nós visitados
+
 
     private void Start()
     {
         SpawnEnemy();
         //StartCoroutine(UpdateEnemyMovement()); // Descomente isso se quiser que o bot se mova automaticamente
-        SetupGrid();
+        //SetupGrid();
         //MoveBotToAdjacentNodes();
         StartCoroutine(AutoMoveBot());
 
@@ -44,31 +44,13 @@ public class AStar_Funcionar : MonoBehaviour
             yield return new WaitForSeconds(1.0f); // Espera 1 segundo antes de mover novamente (ajuste conforme necessário)
         }
     }
-
-    private void Update()
-    {
-
-
-
-
-
-    }
     /*
-    private void PrintVisitedNodes()
-    {
-        Debug.Log("Visited Nodes:");
 
-        foreach (Vector2Int node in visitedNodes)
-        {
-            Debug.Log($"Dentro da lista esta atualmente({node.x}, {node.y})");
-        }
-    }
-    */
     private void SetupGrid()
     {
         if (gameLevelManager != null && gameLevelManager.TotalCoordinates != null)
         {
-            int gridSizeX = CreateLevel.Instance.gridSizeX;
+            int gridSizeX = CreateLevel.Instance.gridSizeX; 
             int gridSizeZ = CreateLevel.Instance.gridSizeZ;
 
             grid = new int[gridSizeX, gridSizeZ];
@@ -87,7 +69,7 @@ public class AStar_Funcionar : MonoBehaviour
             Debug.LogWarning("GameLevelManager or AllCoordinates is null. Cannot setup grid.");
         }
     }
-
+    */
     private void SpawnEnemy()
     {
         List<Vector2Int> avoidedCoordinates = gameLevelManager.AvoidedCoordinates;
@@ -99,40 +81,7 @@ public class AStar_Funcionar : MonoBehaviour
         // Definir a posição alvo inicial (pode ser a posição do jogador)
         targetPosition = new Vector2Int(0, 0);  // Defina sua lógica para determinar a posição alvo inicial
     }
-    /*
-    private void PrintAdjacentNodes()
-    {
-        // Obtém a posição atual do inimigo
-        Vector2Int currentPos = new Vector2Int(Mathf.RoundToInt(enemyInstance.transform.position.x),
-                                               Mathf.RoundToInt(enemyInstance.transform.position.z));
-
-        Debug.Log("Posição Atual: " + currentPos);
-
-        // Obtém os nós vizinhos ao redor do inimigo (assumindo um grid 2D)
-        List<Vector2Int> adjacentNodes = GetAdjacentNodes(currentPos);
-
-        // Imprime os nós vizinhos
-        Debug.Log("Nós Vizinhos:");
-        foreach (Vector2Int node in adjacentNodes)
-        {
-            Debug.Log($"({node.x}, {node.y}) {grid[node.x, node.y]}");
-        }
-
-        Debug.Log("Grid:");
-
-        for (int z = 0; z < CreateLevel.Instance.gridSizeZ; z++)
-        {
-            string row = "";
-
-            for (int x = 0; x < CreateLevel.Instance.gridSizeX; x++)
-            {
-                row += $"{grid[x, z]} ";
-            }
-
-            Debug.Log(row);
-        }
-    }
-    */
+    
     private List<Vector2Int> GetAdjacentNodes(Vector2Int centerNode)
     {
         // Lógica para obter os nós vizinhos (por exemplo, os nós ao norte, sul, leste e oeste)
@@ -146,8 +95,7 @@ public class AStar_Funcionar : MonoBehaviour
 
         return adjacentNodes;
     }
-    private List<Vector2Int> visitedNodes = new List<Vector2Int>();  // Lista de nós visitados
-    private List<Vector2Int> allVisitedNodes = new List<Vector2Int>();  // Lista de todos os nós visitados
+    
 
     private IEnumerator MoveBotToAdjacentNodes()
     {

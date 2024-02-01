@@ -5,14 +5,17 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-
     float moveSpeed = 0;
-    [SerializeField] private float destroyTimer = 2f;
+
     private int maxBomb = 1;
     private int bombPlaced = 0;
     private bool hasControl = true;
     private bool isPaused = false;
+    private AudioSource myAudioSource;
 
+    [SerializeField] private AudioClip playerDeathSound;
+    [SerializeField] private AudioClip powerUpSound;
+    [SerializeField] private float destroyTimer = 2f;
 
     Rigidbody rb;
 
@@ -25,15 +28,25 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         myGameManager = FindObjectOfType<GameManager>();
+        myAudioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(hasControl && !isPaused)
+        if (hasControl && !isPaused)
         {
             Movement();
+            Rotation();
             PlaceBomb();
+        }
+    }
+
+    public void Rotation()
+    {
+        if (rb.velocity != Vector3.zero)
+        {
+            transform.forward = rb.velocity;
         }
     }
 
@@ -64,7 +77,7 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space) && bombPlaced < maxBomb)
         {
-            //Verifica se ja existe um bomba no local, entao não vai permitir instanciar mais nenhuma bomba
+            // Check if there is already a bomb at the location, preventing the instantiation of another bomb
             Vector3 center = new Vector3(Mathf.Round(transform.position.x), 0.5f, Mathf.Round(transform.position.z));
             Collider[] hitColliders = Physics.OverlapSphere(center, 0.5f);
             foreach (Collider hitCollider in hitColliders)
@@ -74,7 +87,8 @@ public class PlayerController : MonoBehaviour
                     return;
                 }
             }
-            //agora vai colocar as bombas dentro dos NODES corretamente
+
+            // Place bombs within the correct NODES
             GameObject bomb = Instantiate(bombPrefab, transform.position, Quaternion.identity);
             bomb.transform.position = center;
             bombPlaced++;
@@ -83,24 +97,24 @@ public class PlayerController : MonoBehaviour
 
     public void Died()
     {
-        //Tell the GAme manager that player died
+        // Tell the Game manager that the player died
         myGameManager.PlayerDied();
-        hasControl= false;
-        //Destrui o objeto
+        hasControl = false;
+        // Destroy the object
         Destroy(gameObject, destroyTimer);
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.tag == "Enemy")
+        if (collision.gameObject.tag == "Enemy")
         {
-            Died();          
+            Died();
         }
     }
 
     public void BombExploded()
     {
-        bombPlaced--; 
+        bombPlaced--;
     }
 
     public float GetDestroyerTime()
@@ -108,7 +122,7 @@ public class PlayerController : MonoBehaviour
         return destroyTimer;
     }
 
-    public void initializePlayer(int bombs, float speed)
+    public void InitializePlayer(int bombs, float speed)
     {
         maxBomb = bombs;
         moveSpeed = speed;
@@ -119,5 +133,17 @@ public class PlayerController : MonoBehaviour
         isPaused = state;
     }
 
-    
+    // TODO: Not working, needs to be revised
+    public void PlayPowerUpSound()
+    {
+        // Debug.Log("PlayPowerUpSound called");
+        if (myAudioSource != null && powerUpSound != null)
+        {
+            myAudioSource.PlayOneShot(powerUpSound);
+        }
+        else
+        {
+            Debug.LogWarning("AudioSource or PowerUpSound is null. Check your assignments.");
+        }
+    }
 }

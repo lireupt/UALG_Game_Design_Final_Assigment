@@ -1,17 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 using UnityEditor;
-using NUnit.Framework;
-using Unity.VisualScripting;
-using static PlasticPipe.PlasticProtocol.Messages.Serialization.ItemHandlerMessagesSerialization;
 using System.Linq;
-using System;
-using NUnit.Framework.Constraints;
 
-[CustomEditor(typeof(CreateLevel))]
-[CanEditMultipleObjects]
+/*
+//[CustomEditor(typeof(CreateLevel))]
+//[CanEditMultipleObjects]
 public class LevelEditor : Editor
 {
     GameObject groundPrefab;
@@ -31,6 +26,40 @@ public class LevelEditor : Editor
     // Torna cleanCoordinates uma propriedade pública
     public List<Vector2Int> CleanCoordinates { get; private set; }
 
+ 
+
+    private LevelEditor levelEditor;
+
+    public void OnEnable()
+    {
+        EditorApplication.update += AutoGenerateBoard;
+    }
+
+    private void OnDisable()
+    {
+        EditorApplication.update -= AutoGenerateBoard;
+    }
+
+    private void AutoGenerateBoard()
+    {
+        // Coloque a lógica aqui para decidir quando ativar o botão automaticamente
+        if (ShouldAutoGenerateBoard())
+        {
+            //BuildBoard();
+
+          
+
+            // Remova o comentário abaixo se desejar desativar automaticamente após a geração
+            //EditorApplication.update -= AutoGenerateBoard;
+        }
+    }
+
+    private bool ShouldAutoGenerateBoard()
+    {
+        // Coloque a lógica aqui para decidir quando ativar automaticamente
+        // Por exemplo, você pode verificar se o Editor está em PlayMode ou EditMode
+        return EditorApplication.isPlayingOrWillChangePlaymode && !scriptActive;
+    }
 
     //Function to create inspector game board
     public override void OnInspectorGUI()
@@ -49,16 +78,7 @@ public class LevelEditor : Editor
         {
             if (!scriptActive)
             {
-                //Manager ground
-                BuildGround();
-                //Manager border
-                BuildBorder();
-                //Build destructable walls
-                //BuildDestructableWalls();
-                //Inner walls
-                BuildInnerWalls();
-                //Ajust camera
-                AdjustCameraToBoard();
+                BuildBoard();
             }
         }
 
@@ -67,14 +87,7 @@ public class LevelEditor : Editor
         {
             if (!scriptActive)
             {
-                //Delete ground
-                DeleteGround();
-                //Delete ground
-                DeleteBorder();
-                //Delete innerWalls
-                DeleteInnerWalls();
-                //Delete destructable walls
-                //DeleteDestructableWalls();
+                DeleteBoard();
             }
         }
         EditorGUILayout.EndHorizontal();
@@ -82,7 +95,7 @@ public class LevelEditor : Editor
         //Inner walls
         EditorGUILayout.BeginHorizontal();
         //Create a complete boarder from UI
-        if (GUILayout.Button("Create InnerWallls"))
+        if (GUILayout.Button("Create Inner Walls"))
         {
             if (!scriptActive)
             {
@@ -91,15 +104,35 @@ public class LevelEditor : Editor
         }
 
         //Delete a complete boarder from UI
-        if (GUILayout.Button("Delete InnerWallls"))
+        if (GUILayout.Button("Delete Inner Walls"))
         {
             if (!scriptActive)
             {
-                //DeleteInnerWalls();
-                DeleteDestructableWalls();
+                DeleteInnerWalls();
             }
         }
         EditorGUILayout.EndHorizontal();
+    }
+
+    //Function to create game board
+    void BuildBoard()
+    {
+        BuildGround();
+        BuildBorder();
+        BuildInnerWalls();
+        AdjustCameraToBoard();
+        // Adicione a mensagem de depuração
+        Debug.Log("Botão 'Create Border' pressionado!");
+
+    }
+
+    //Function to delete game board
+    void DeleteBoard()
+    {
+        DeleteGround();
+        DeleteBorder();
+        DeleteInnerWalls();
+        //DeleteDestructableWalls(); // Se desejar excluir paredes destrutíveis também
     }
     //Function to create game ground
     void BuildGround()
@@ -229,7 +262,8 @@ public class LevelEditor : Editor
 
         int dist = 2;
 
-        for (int i = dist; i <= create.gridSizeX - dist; i++) {
+        for (int i = dist; i <= create.gridSizeX - dist; i++)
+        {
             for (int j = dist; j <= create.gridSizeZ - dist; j++)
             {
                 if ((i % dist) == 0 && (j % dist) == 0)
@@ -286,7 +320,7 @@ public class LevelEditor : Editor
         int lastPositionX = Mathf.RoundToInt(create.gridSizeX + create.start.x + create.offset.x);
         int lastPositionZ = Mathf.RoundToInt(create.gridSizeZ + create.start.z + create.offset.z);
 
-       
+
         //All available coordinates for the board game
         List<Vector2Int> gameCoordinates = new List<Vector2Int>();
         for (int i = Mathf.RoundToInt(create.start.x); i < lastPositionX; i++)
@@ -296,7 +330,7 @@ public class LevelEditor : Editor
                 Vector2Int currentCoordinate = new Vector2Int(i, j);
 
                 // Verifica se a célula não está entre as peças fixas e não está fora dos limites do tabuleiro
-                if (i < create.gridSizeX && j < create.gridSizeZ )
+                if (i < create.gridSizeX && j < create.gridSizeZ)
                 {
                     gameCoordinates.Add(currentCoordinate);
                 }
@@ -315,25 +349,25 @@ public class LevelEditor : Editor
         avoidedCoordinates.Add(startCoordinate0);
         avoidedCoordinates.Add(startCoordinate1);
         avoidedCoordinates.Add(startCoordinate2);
-     
-         //For the last coordinates 
-         for (int i = 0; i < gameCoordinates.Count; i++)
-         {
-             Vector2Int lastCoordinate = gameCoordinates[gameCoordinates.Count - 1];
 
-             int last1 = lastCoordinate.x - 1;
-             int last2 = lastCoordinate.y - 1;
-             int last3 = lastCoordinate.y - 2;           
-             int last4 = lastCoordinate.x - 2;
+        //For the last coordinates 
+        for (int i = 0; i < gameCoordinates.Count; i++)
+        {
+            Vector2Int lastCoordinate = gameCoordinates[gameCoordinates.Count - 1];
 
-             Vector2Int endCoordinate0 = new Vector2Int(last1, last2);
-             Vector2Int endCoordinate1 = new Vector2Int(last1, last3);
-             Vector2Int endCoordinate2 = new Vector2Int(last4, last2);
+            int last1 = lastCoordinate.x - 1;
+            int last2 = lastCoordinate.y - 1;
+            int last3 = lastCoordinate.y - 2;
+            int last4 = lastCoordinate.x - 2;
 
-             avoidedCoordinates.Add(endCoordinate0);
-             avoidedCoordinates.Add(endCoordinate1);
-             avoidedCoordinates.Add(endCoordinate2);
-         }
+            Vector2Int endCoordinate0 = new Vector2Int(last1, last2);
+            Vector2Int endCoordinate1 = new Vector2Int(last1, last3);
+            Vector2Int endCoordinate2 = new Vector2Int(last4, last2);
+
+            avoidedCoordinates.Add(endCoordinate0);
+            avoidedCoordinates.Add(endCoordinate1);
+            avoidedCoordinates.Add(endCoordinate2);
+        }
 
         // Remover duplicatas usando Distinct
         List<Vector2Int> uniqueAvoidedCoordinates = avoidedCoordinates.Distinct().ToList();
@@ -353,7 +387,7 @@ public class LevelEditor : Editor
                 // Verifica se a coordenada não está na lista de coordenadas a serem evitadas
                 if (!isOnBorder && !avoidedCoordinates.Contains(currentCoordinate))
                 {
-                    availableCoordinates.Add(currentCoordinate);                   
+                    availableCoordinates.Add(currentCoordinate);
                 }
             }
         }
@@ -368,7 +402,7 @@ public class LevelEditor : Editor
         //create random blocks inside board only in available coordinates
         foreach (Vector2Int coord in availableCoordinates)
         {
-            
+
             // Verifica se a probabilidade permite a colocação de um bloco
             if (random.NextDouble() < wallPlacementProbability)
             {
@@ -399,7 +433,7 @@ public class LevelEditor : Editor
         {
             Debug.Log("Coordenadas não ocupadas: " + cleancCord);
         }
-        */
+      
 
         scriptActive = false;
     }
@@ -451,4 +485,4 @@ public class LevelEditor : Editor
         // float fov = Mathf.Atan(Mathf.Max(boardWidth, boardHeight) * 0.5f / distanceToBoard) * 2f * Mathf.Rad2Deg;
         // gameCamera.fieldOfView = fov;
     }
-}
+}*/
